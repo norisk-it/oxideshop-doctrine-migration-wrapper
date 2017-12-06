@@ -82,7 +82,7 @@ class Migrations
      *
      * @return int error code if one exist or 0 for success
      */
-    public function execute($command, $edition = null)
+    public function execute($command, $edition = null, $dryrun = false)
     {
         $migrationPaths = $this->getMigrationPaths($edition);
 
@@ -90,13 +90,17 @@ class Migrations
 
             $doctrineApplication = $this->doctrineApplicationBuilder->build();
 
-            $input = $this->formDoctrineInput($command, $migrationPath, $this->dbFilePath);
+            $input = $this->formDoctrineInput($command, $migrationPath, $this->dbFilePath, $dryrun);
 
             if ($this->shouldRunCommand($command, $migrationPath)) {
                 $errorCode = $doctrineApplication->run($input, $this->output);
                 if ($errorCode) {
                     return $errorCode;
                 }
+            }
+
+            if ($dryrun) {
+                sleep(1);
             }
         }
 
@@ -112,12 +116,14 @@ class Migrations
      *
      * @return ArrayInput
      */
-    private function formDoctrineInput($command, $migrationPath, $dbFilePath)
+    private function formDoctrineInput($command, $migrationPath, $dbFilePath, $dryrun)
     {
         $input = new ArrayInput([
             '--configuration' => $migrationPath,
             '--db-configuration' => $dbFilePath,
-            '-n' => true,
+            '--dry-run' => $dryrun,
+            '--write-sql' => $dryrun,
+           '-n' => true,
             'command' => $command
         ]);
         return $input;

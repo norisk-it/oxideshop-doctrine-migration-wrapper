@@ -46,6 +46,7 @@ $migrationsBuilder = new \OxidEsales\DoctrineMigrationWrapper\MigrationsBuilder(
 $migrations = $migrationsBuilder->build();
 
 $command = isset($argv[1]) ? $argv[1] : null;
-$edition = isset($argv[2]) ? $argv[2] : null;
+$edition = isset($argv[2]) && $argv[2] != '-dryrun' ? $argv[2] : null;
+$dryrun = (isset($argv[2]) && $argv[2] == '-dryrun') || (isset($argv[3]) && $argv[3] == '-dryrun');
 
-exit($migrations->execute($command, $edition));
+exit($migrations->execute($command, $edition, $dryrun));
